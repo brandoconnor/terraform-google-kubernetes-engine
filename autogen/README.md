@@ -1,6 +1,7 @@
 # Terraform Kubernetes Engine Module
 
-This module handles opinionated Google Cloud Platform Kubernetes Engine cluster creation and configuration with Node Pools, IP MASQ, Network Policy, etc. 
+This module handles opinionated Google Cloud Platform Kubernetes Engine cluster creation and configuration with Node Pools, IP MASQ, Network Policy, etc. {% if private_cluster %}This particular submodule creates a [private cluster](https://cloud.google.com/kubernetes-engine/docs/how-to/private-clusters){% endif %}
+
 The resources/services/activations/deletions that this module will create/trigger are:
 - Create a GKE cluster with the provided addons
 - Create GKE Node Pool(s) with provided configuration and attach to cluster
@@ -13,7 +14,7 @@ There are multiple examples included in the [examples](./examples/) folder but s
 
 ```hcl
 module "gke" {
-  source                     = "terraform-google-modules/kubernetes-engine/google"
+  source                     = "terraform-google-modules/kubernetes-engine/google{% if private_cluster %}//modules/private-cluster{% endif %}"
   project_id                 = "<PROJECT ID>"
   name                       = "gke-test-1"
   region                     = "us-central1"
@@ -26,6 +27,11 @@ module "gke" {
   horizontal_pod_autoscaling = true
   kubernetes_dashboard       = true
   network_policy             = true
+  {% if private_cluster %}
+  enable_private_endpoint    = true
+  enable_private_nodes       = true
+  master_ipv4_cidr_block     = "10.0.0.0/28"
+  {% endif %}
 
   node_pools = [
     {
@@ -171,7 +177,8 @@ The [project factory](https://github.com/terraform-google-modules/terraform-goog
 - [kubectl](https://github.com/kubernetes/kubernetes/releases) 1.9.x
 ### Terraform plugins
 - [Terraform](https://www.terraform.io/downloads.html) 0.10.x
-- [terraform-provider-google](https://github.com/terraform-providers/terraform-provider-google) plugin v1.8.0
+- [terraform-provider-google](https://github.com/terraform-providers/terraform-provider-google) plugin {% if private_cluster %}beta{% else %}v1.8.0{% endif %}
+
 ### Configure a Service Account
 In order to execute this module you must have a Service Account with the
 following project roles:

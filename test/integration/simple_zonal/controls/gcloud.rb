@@ -46,6 +46,14 @@ control "gcloud" do
         expect(data['locations'].size).to eq 1
       end
 
+      it "uses the public master endpoint" do
+        expect(data['privateClusterConfig']['enablePrivateEndpoint']).to eq true
+      end
+
+      it "uses public nodes" do
+        expect(data['privateClusterConfig']['enablePrivateNodes']).to eq true
+      end
+
       it "has the expected initial cluster version" do
         expect(data['initialClusterVersion']).to eq "1.11.4-gke.13"
       end
